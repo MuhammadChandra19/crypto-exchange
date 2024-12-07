@@ -1,5 +1,4 @@
-#ifndef ORDER_MANAGER_HPP
-#define ORDER_MANAGER_HPP
+#pragma once
 
 #include <string>
 #include <iostream>
@@ -11,5 +10,3 @@ public:
 
     void processOrder(const std::string& order);
 };
-
-#endif // ORDER_MANAGER_HPP

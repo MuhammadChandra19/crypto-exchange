@@ -1,5 +1,4 @@
-#ifndef MATCHING_ENGINE_HPP
-#define MATCHING_ENGINE_HPP
+#pragma once
 
 #include <string>
 #include <iostream>
@@ -12,5 +11,3 @@ public:
     void initialize();
     void processOrder(const std::string& order);
 };
-
-#endif // MATCHING_ENGINE_HPP

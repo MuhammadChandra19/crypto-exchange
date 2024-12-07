@@ -1,9 +1,15 @@
 set(SOURCES
     MatchingEngine.cpp
+    Order.cpp
+    Limit.cpp
+    Match.cpp
 )
 
 set(HEADERS
     MatchingEngine.hpp
+    Order.hpp
+    Limit.hpp
+    Match.hpp
 )
 
 add_library(matching_engine STATIC ${SOURCES} ${HEADERS})

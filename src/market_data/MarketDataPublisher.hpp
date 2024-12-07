@@ -1,5 +1,5 @@
-#ifndef MARKET_DATA_PUBLISHER_HPP
-#define MARKET_DATA_PUBLISHER_HPP
+#pragma once
+
 
 #include <iostream>
 #include <string>
@@ -11,5 +11,3 @@ public:
 
     void publishData();
 };
-
-#endif // MARKET_DATA_PUBLISHER_HPP
