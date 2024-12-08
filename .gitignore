@@ -7,6 +7,7 @@
 ########### FOLDERS ############
 ################################
 build/
+cmake-build-debug/
 build-*/
 html/
 
@@ -145,4 +146,4 @@ ipch/
 # Visual Studio Trace Files
 *.e2e
 
-cmake-build-debug/
+cmake-build-debug
