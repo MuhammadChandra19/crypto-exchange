@@ -31,27 +31,27 @@ std::vector<Match> Limit::Fill(const std::shared_ptr<Order>& order) {
     std::vector<Match> matches;
     std::vector<std::shared_ptr<Order>> ordersToDelete;
 
-    double const remainingSize = order->Size;
-
-    for (const auto it = OrderList.begin(); it != OrderList.end() && remainingSize > 0;) {
-        auto& currentOrder = *it;
-        Match const match = fillOrder(currentOrder, order);
-
-        // Record the match
+    for (const auto& orderPtr : OrderList)
+    {
+        Match const match = fillOrder(orderPtr, order);
         matches.push_back(match);
+
         TotalVolume -= match.SizeFilled;
 
-        if (currentOrder->IsFilled()) {
-            ordersToDelete.push_back(currentOrder);
+        if (orderPtr->IsFilled())
+        {
+            ordersToDelete.push_back(orderPtr);
         }
 
-        if (order->IsFilled()) {
+        if (order->IsFilled())
+        {
             break;
         }
     }
 
-    for (const auto it = ordersToDelete.begin(); it != ordersToDelete.end();) {
-        DeleteOrder(*it);
+    for (const auto& orderPtr : ordersToDelete)
+    {
+        DeleteOrder(orderPtr);
     }
 
 

@@ -50,40 +50,31 @@ void OrderBook::PlaceLimitOrder(const double price, const std::shared_ptr<Order>
 // Place a market order and match it with existing orders
 std::vector<Match> OrderBook::PlaceMarketOrder(const std::shared_ptr<Order>& order) {
     std::vector<Match> matches;
-    const auto & limits = order->Bid ? Asks : Bids; // Select the opposite side of the orderbook
+    const auto & limits = order->Bid ? GetAsks() : GetBids(); // Select the opposite side of the orderbook
 
-    double remainingSize = order->Size;
-
-    while (!limits.empty() && remainingSize > 0) {
-        const auto& bestLimit = limits.front();
-
-        while (!bestLimit->OrderList.empty() && remainingSize > 0) {
-            auto bestOrder = bestLimit->OrderList.front();
-
-            double const sizeFilled = std::min(remainingSize, bestOrder->Size);
-            double const fillPrice = bestLimit->Price;
-
-            // Record the match
-            matches.emplace_back(
-                bestOrder->Bid ? nullptr : bestOrder, // Counterparty's ask order
-                bestOrder->Bid ? bestOrder : nullptr, // Counterparty's bid order
-                sizeFilled,
-                fillPrice
-            );
-
-            // Adjust order sizes
-            remainingSize -= sizeFilled;
-            bestOrder->Size -= sizeFilled;
-
-            if (bestOrder->Size == 0) {
-                bestLimit->DeleteOrder(bestOrder);
-                Orders.erase(bestOrder->ID);
-            }
+    if (order->Bid)
+    {
+        if (order->Size > AskTotalVolume())
+        {
+            // not enough volume
+            return matches;
         }
+    } else
+    {
+        if (order->Size > BidTotalVolume())
+        {
+            // not enough volume
+            return matches;
+        }
+    }
 
-        // Remove empty limit
-        if (bestLimit->OrderList.empty()) {
-            clearLimit(order->Bid, bestLimit);
+    for (const auto& limit : limits)
+    {
+        std::vector<Match> limit_matches = limit->Fill(order);
+        matches.insert(matches.end(), limit_matches.begin(), limit_matches.end());
+        if (limit->OrderList.empty())
+        {
+            clearLimit(order->Bid, limit);
         }
     }
 

@@ -15,7 +15,7 @@ protected:
     }
 
     // Helper function to create a Limit and Place an order
-    void PlaceOrder(OrderBook& orderbook,
+    static void PlaceOrder(OrderBook& orderbook,
                     const double price,
                     const double size,
                     const bool isBid, const std::string& id,
@@ -85,14 +85,14 @@ TEST_F(OrderbookTest, PlaceMarketOrder) {
 
     // Place bid and ask orders
     PlaceOrder(orderbook, 100.0, 10.0, false, "1", 12345, 1678901234);
-    PlaceOrder(orderbook, 99.0, 5.0, true, "2", 12346, 1678901244);
+    PlaceOrder(orderbook, 99.0, 5.0, false, "2", 12346, 1678901244);
 
     // Place a market order
-    const auto marketOrder = CreateOrder(4, 12347, 5.0, true, nullptr, 1678901254);
+    const auto marketOrder = CreateOrder(4, 12347, 15.0, true, nullptr, 1678901254);
     const auto matches = orderbook.PlaceMarketOrder(marketOrder);
 
     // Verify that the market order was filled
-    ASSERT_EQ(matches.size(), 1);
+    ASSERT_EQ(matches.size(), 2);
     ASSERT_DOUBLE_EQ(matches[0].SizeFilled, 5.0);
     ASSERT_EQ(marketOrder->Size, 0.0);  // The market order should be fully filled
 }
@@ -103,7 +103,7 @@ TEST_F(OrderbookTest, ClearLimit) {
 
     // Place some orders
     PlaceOrder(orderbook, 100.0, 10.0, false, "1", 12345, 1678901234);
-    PlaceOrder(orderbook, 99.0, 5.0, true, "2", 12346, 1678901244);
+    PlaceOrder(orderbook, 99.0, 5.0, false, "2", 12346, 1678901244);
 
     // Cancel the bid order
     auto bidOrder = CreateOrder(2, 12347, 5.0, true, nullptr, 1678901254);

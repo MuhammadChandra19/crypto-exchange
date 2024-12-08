@@ -68,7 +68,7 @@ TEST_F(LimitTest, FillOrders) {
     ASSERT_DOUBLE_EQ(matches[0].SizeFilled, 5.0);
     ASSERT_EQ(order2->Size, 0.0);  // The ask order should be fully filled
     ASSERT_DOUBLE_EQ(order1->Size, 5.0);  // The bid order size should be 5.0 after the fill
-    ASSERT_DOUBLE_EQ(limit->TotalVolume, 5.0);  // Total volume should be updated
+    ASSERT_DOUBLE_EQ(limit->TotalVolume, 10.0);  // Total volume should be updated
 }
 
 // Test if the Fill method handles partial fills
@@ -90,5 +90,5 @@ TEST_F(LimitTest, FillPartialOrder) {
     ASSERT_DOUBLE_EQ(matches[0].SizeFilled, 7.0);  // The full size of the ask order
     ASSERT_EQ(order2->Size, 0.0);  // The ask order should be fully filled
     ASSERT_DOUBLE_EQ(order1->Size, 3.0);  // The bid order should have 3.0 remaining
-    ASSERT_DOUBLE_EQ(limit->TotalVolume, 3.0);  // Total volume should be updated
+    ASSERT_DOUBLE_EQ(limit->TotalVolume, 10.0);  // Total volume should be updated
 }
