@@ -8,5 +8,5 @@ public:
     OrderManager();
     ~OrderManager();
 
-    void processOrder(const std::string& order);
+    static void processOrder(const std::string& order);
 };

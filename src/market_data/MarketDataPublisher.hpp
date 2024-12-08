@@ -9,5 +9,5 @@ public:
     MarketDataPublisher();
     ~MarketDataPublisher();
 
-    void publishData();
+    static void publishData();
 };

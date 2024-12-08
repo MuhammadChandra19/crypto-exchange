@@ -87,11 +87,11 @@ void OrderBook::clearLimit(const bool bid, const std::shared_ptr<Limit>& limit) 
     auto& limitsList = bid ? Bids : Asks;
 
     limitMap.erase(limit->Price);
-    std::erase_if(limitsList, [&limit](const auto &l) { return l->Price == limit->Price; });
+    std::erase_if(limitsList, [&limit](const auto &lim) { return lim->Price == limit->Price; });
 }
 
 // Find or create a new limit for a given price
-std::shared_ptr<Limit> OrderBook::FindOrCreateLimit(double price, bool isBid) {
+std::shared_ptr<Limit> OrderBook::FindOrCreateLimit(double price, const bool isBid) {
     auto& limits = isBid ? Bids : Asks;
     auto& limitMap = isBid ? BidLimits : AskLimits;
 
@@ -106,7 +106,7 @@ std::shared_ptr<Limit> OrderBook::FindOrCreateLimit(double price, bool isBid) {
 }
 
 // Remove an empty limit if it exists
-void OrderBook::removeEmptyLimit(double price, bool isBid) {
+void OrderBook::removeEmptyLimit(const double price, const bool isBid) {
     auto& limitMap = isBid ? BidLimits : AskLimits;
 
     if (const auto match_limit = limitMap.find(price);
