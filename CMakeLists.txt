@@ -27,4 +27,6 @@ FetchContent_MakeAvailable(fmt)
 
 # Add subdirectories
 add_subdirectory(src)
+
+enable_testing()
 add_subdirectory(tests)

@@ -3,6 +3,7 @@ set(SOURCES
     Order.cpp
     Limit.cpp
     Match.cpp
+    Orderbook.cpp
 )
 
 set(HEADERS
@@ -10,6 +11,7 @@ set(HEADERS
     Order.hpp
     Limit.hpp
     Match.hpp
+    Orderbook.hpp
 )
 
 add_library(matching_engine STATIC ${SOURCES} ${HEADERS})
