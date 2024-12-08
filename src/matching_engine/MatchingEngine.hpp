@@ -8,6 +8,6 @@ public:
     MatchingEngine();
     ~MatchingEngine();
 
-    void initialize();
-    void processOrder(const std::string& order);
+    static void initialize();
+    static void processOrder(const std::string& order);
 };

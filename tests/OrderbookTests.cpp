@@ -1,30 +1,35 @@
+#include "../src/matching_engine/Limit.hpp"
+#include "../src/matching_engine/Match.hpp" // Include necessary headers for Order and Match
+#include "../src/matching_engine/Order.hpp"
+#include "../src/matching_engine/OrderBook.hpp"
 #include <gtest/gtest.h>
 #include <memory>
-#include "../src/matching_engine/Orderbook.hpp"
-#include "../src/matching_engine/Limit.hpp"
-#include "../src/matching_engine/Order.hpp"
-#include "../src/matching_engine/Match.hpp"  // Include necessary headers for Order and Match
 
 class OrderbookTest : public ::testing::Test {
 protected:
     OrderbookTest() {}
 
     // Helper function to create an order
-    std::shared_ptr<Order> CreateOrder(int64_t id, int64_t user_id, double size, bool isBid, std::shared_ptr<Limit> limit, int64_t timestamp) {
+    static std::shared_ptr<Order> CreateOrder(int64_t id, int64_t user_id, double size, bool isBid, std::shared_ptr<Limit> limit, int64_t timestamp) {
         return std::make_shared<Order>(id, user_id, size, isBid, limit, timestamp);
     }
 
     // Helper function to create a Limit and Place an order
-    void PlaceOrder(Orderbook& orderbook, double price, double size, bool isBid, const std::string& id, int64_t user_id, int64_t timestamp) {
-        auto limit = orderbook.FindOrCreateLimit(price, isBid);
-        auto order = CreateOrder(std::stoi(id), user_id, size, isBid, limit, timestamp);
+    void PlaceOrder(OrderBook& orderbook,
+                    const double price,
+                    const double size,
+                    const bool isBid, const std::string& id,
+                    const int64_t user_id,
+                    const int64_t timestamp) {
+        const auto limit = orderbook.FindOrCreateLimit(price, isBid);
+        const auto order = CreateOrder(std::stoi(id), user_id, size, isBid, limit, timestamp);
         orderbook.PlaceLimitOrder(price, order);
     }
 };
 
 // Test AskTotalVolume method
 TEST_F(OrderbookTest, AskTotalVolume) {
-    Orderbook orderbook;
+    OrderBook orderbook;
 
     // Place some ask orders
     PlaceOrder(orderbook, 100.0, 10.0, false, "1", 12345, 1678901234);
@@ -36,7 +41,7 @@ TEST_F(OrderbookTest, AskTotalVolume) {
 
 // Test BidTotalVolume method
 TEST_F(OrderbookTest, BidTotalVolume) {
-    Orderbook orderbook;
+    OrderBook orderbook;
 
     // Place some bid orders
     PlaceOrder(orderbook, 99.0, 15.0, true, "1", 12345, 1678901234);
@@ -48,13 +53,13 @@ TEST_F(OrderbookTest, BidTotalVolume) {
 
 // Test CancelOrder method
 TEST_F(OrderbookTest, CancelOrder) {
-    Orderbook orderbook;
+    OrderBook orderbook;
 
     // Place an order
     PlaceOrder(orderbook, 100.0, 10.0, false, "1", 12345, 1678901234);
     PlaceOrder(orderbook, 100.0, 5.0, false, "2", 12346, 1678901244);
 
-    auto order = CreateOrder(3, 12347, 5.0, false, nullptr, 1678901254);
+    const auto order = CreateOrder(3, 12347, 5.0, false, nullptr, 1678901254);
     orderbook.CancelOrder(order);  // Trying to cancel an order that hasn't been placed
 
     // Check if the order is removed
@@ -63,7 +68,7 @@ TEST_F(OrderbookTest, CancelOrder) {
 
 // Test PlaceLimitOrder method
 TEST_F(OrderbookTest, PlaceLimitOrder) {
-    Orderbook orderbook;
+    OrderBook orderbook;
 
     // Place a limit order
     PlaceOrder(orderbook, 100.0, 10.0, false, "1", 12345, 1678901234);
@@ -76,15 +81,15 @@ TEST_F(OrderbookTest, PlaceLimitOrder) {
 
 // Test PlaceMarketOrder method
 TEST_F(OrderbookTest, PlaceMarketOrder) {
-    Orderbook orderbook;
+    OrderBook orderbook;
 
     // Place bid and ask orders
     PlaceOrder(orderbook, 100.0, 10.0, false, "1", 12345, 1678901234);
     PlaceOrder(orderbook, 99.0, 5.0, true, "2", 12346, 1678901244);
 
     // Place a market order
-    auto marketOrder = CreateOrder(4, 12347, 5.0, true, nullptr, 1678901254);
-    auto matches = orderbook.PlaceMarketOrder(marketOrder);
+    const auto marketOrder = CreateOrder(4, 12347, 5.0, true, nullptr, 1678901254);
+    const auto matches = orderbook.PlaceMarketOrder(marketOrder);
 
     // Verify that the market order was filled
     ASSERT_EQ(matches.size(), 1);
@@ -94,7 +99,7 @@ TEST_F(OrderbookTest, PlaceMarketOrder) {
 
 // Test clearLimit method (removes empty limits)
 TEST_F(OrderbookTest, ClearLimit) {
-    Orderbook orderbook;
+    OrderBook orderbook;
 
     // Place some orders
     PlaceOrder(orderbook, 100.0, 10.0, false, "1", 12345, 1678901234);
@@ -110,13 +115,13 @@ TEST_F(OrderbookTest, ClearLimit) {
 
 // Test FindOrCreateLimit method
 TEST_F(OrderbookTest, FindOrCreateLimit) {
-    Orderbook orderbook;
+    OrderBook orderbook;
 
     // Create a limit order
     PlaceOrder(orderbook, 100.0, 10.0, false, "1", 12345, 1678901234);
 
     // Find or create limit for the same price
-    auto limit = orderbook.FindOrCreateLimit(100.0, false);
+    const auto limit = orderbook.FindOrCreateLimit(100.0, false);
 
     // Verify the limit is the same
     ASSERT_NE(limit, nullptr);

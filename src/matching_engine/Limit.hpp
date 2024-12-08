@@ -17,7 +17,7 @@ public:
     std::vector<Match> Fill(const std::shared_ptr<Order>& order);
 
 private:
-    Match fillOrder(const std::shared_ptr<Order>& a, const std::shared_ptr<Order>& b);
+    Match fillOrder(const std::shared_ptr<Order>& a_order, const std::shared_ptr<Order>& b_order) const;
 };
 
 using Limits = std::vector<std::shared_ptr<Limit>>;

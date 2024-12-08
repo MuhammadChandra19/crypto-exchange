@@ -1,34 +1,33 @@
-#include "Orderbook.hpp"
+#include "OrderBook.hpp"
 #include <algorithm>
 #include <numeric>
 
-Orderbook::Orderbook() = default;
+OrderBook::OrderBook() = default;
 
 // Calculate total volume of asks
-double Orderbook::AskTotalVolume() const {
+double OrderBook::AskTotalVolume() const {
     return std::accumulate(Asks.begin(), Asks.end(), 0.0,
-        [](double sum, const std::shared_ptr<Limit>& limit) {
+        [](const double sum, const std::shared_ptr<Limit>& limit) {
             return sum + limit->TotalVolume;
         });
 }
 
 // Calculate total volume of bids
-double Orderbook::BidTotalVolume() const {
+double OrderBook::BidTotalVolume() const {
     return std::accumulate(Bids.begin(), Bids.end(), 0.0,
-        [](double sum, const std::shared_ptr<Limit>& limit) {
+        [](const double sum, const std::shared_ptr<Limit>& limit) {
             return sum + limit->TotalVolume;
         });
 }
 
 // Cancel an existing order
-void Orderbook::CancelOrder(const std::shared_ptr<Order>& order) {
-    auto it = Orders.find(order->ID);
-    if (it == Orders.end()) {
+void OrderBook::CancelOrder(const std::shared_ptr<Order>& order) {
+    const auto match_order = Orders.find(order->ID);
+    if (match_order == Orders.end()) {
         return; // Order not found
     }
 
-    auto limit = order->LimitPtr;
-    if (limit) {
+    if (const auto limit = order->LimitPtr) {
         limit->DeleteOrder(order);
 
         // Remove empty limits
@@ -37,40 +36,40 @@ void Orderbook::CancelOrder(const std::shared_ptr<Order>& order) {
         }
     }
 
-    Orders.erase(it);
+    Orders.erase(match_order);
 }
 
 // Place a limit order
-void Orderbook::PlaceLimitOrder(double price, const std::shared_ptr<Order>& order) {
-    auto limit = FindOrCreateLimit(price, order->Bid);
+void OrderBook::PlaceLimitOrder(const double price, const std::shared_ptr<Order>& order) {
+    const auto limit = FindOrCreateLimit(price, order->Bid);
     order->LimitPtr = limit;
     limit->AddOrder(order);
     Orders[order->ID] = order;
 }
 
 // Place a market order and match it with existing orders
-std::vector<Match> Orderbook::PlaceMarketOrder(const std::shared_ptr<Order>& order) {
+std::vector<Match> OrderBook::PlaceMarketOrder(const std::shared_ptr<Order>& order) {
     std::vector<Match> matches;
-    auto& limits = order->Bid ? Asks : Bids; // Select the opposite side of the orderbook
+    const auto & limits = order->Bid ? Asks : Bids; // Select the opposite side of the orderbook
 
     double remainingSize = order->Size;
 
     while (!limits.empty() && remainingSize > 0) {
-        auto& bestLimit = limits.front();
+        const auto& bestLimit = limits.front();
 
         while (!bestLimit->OrderList.empty() && remainingSize > 0) {
             auto bestOrder = bestLimit->OrderList.front();
 
-            double sizeFilled = std::min(remainingSize, bestOrder->Size);
-            double fillPrice = bestLimit->Price;
+            double const sizeFilled = std::min(remainingSize, bestOrder->Size);
+            double const fillPrice = bestLimit->Price;
 
             // Record the match
-            matches.push_back(Match{
+            matches.emplace_back(
                 bestOrder->Bid ? nullptr : bestOrder, // Counterparty's ask order
                 bestOrder->Bid ? bestOrder : nullptr, // Counterparty's bid order
                 sizeFilled,
                 fillPrice
-            });
+            );
 
             // Adjust order sizes
             remainingSize -= sizeFilled;
@@ -92,24 +91,21 @@ std::vector<Match> Orderbook::PlaceMarketOrder(const std::shared_ptr<Order>& ord
 }
 
 // Clear an empty limit from the orderbook
-void Orderbook::clearLimit(bool bid, const std::shared_ptr<Limit>& limit) {
+void OrderBook::clearLimit(const bool bid, const std::shared_ptr<Limit>& limit) {
     auto& limitMap = bid ? BidLimits : AskLimits;
     auto& limitsList = bid ? Bids : Asks;
 
     limitMap.erase(limit->Price);
-    limitsList.erase(std::remove_if(limitsList.begin(), limitsList.end(),
-        [&limit](const auto& l) { return l->Price == limit->Price; }),
-        limitsList.end());
+    std::erase_if(limitsList, [&limit](const auto &l) { return l->Price == limit->Price; });
 }
 
 // Find or create a new limit for a given price
-std::shared_ptr<Limit> Orderbook::FindOrCreateLimit(double price, bool isBid) {
+std::shared_ptr<Limit> OrderBook::FindOrCreateLimit(double price, bool isBid) {
     auto& limits = isBid ? Bids : Asks;
     auto& limitMap = isBid ? BidLimits : AskLimits;
 
-    auto it = limitMap.find(price);
-    if (it != limitMap.end()) {
-        return it->second;
+    if (const auto match_limit = limitMap.find(price); match_limit != limitMap.end()) {
+        return match_limit->second;
     }
 
     auto newLimit = std::make_shared<Limit>(price);
@@ -119,11 +115,11 @@ std::shared_ptr<Limit> Orderbook::FindOrCreateLimit(double price, bool isBid) {
 }
 
 // Remove an empty limit if it exists
-void Orderbook::removeEmptyLimit(double price, bool isBid) {
+void OrderBook::removeEmptyLimit(double price, bool isBid) {
     auto& limitMap = isBid ? BidLimits : AskLimits;
-    auto it = limitMap.find(price);
 
-    if (it != limitMap.end() && it->second->OrderList.empty()) {
-        limitMap.erase(it);
+    if (const auto match_limit = limitMap.find(price);
+        match_limit != limitMap.end() && match_limit->second->OrderList.empty()) {
+        limitMap.erase(match_limit);
     }
 }

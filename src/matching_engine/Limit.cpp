@@ -1,7 +1,7 @@
 #include "Limit.hpp"
 #include <algorithm>
 
-Limit::Limit(double price) : Price(price), TotalVolume(0.0) {}
+Limit::Limit(const double price) : Price(price), TotalVolume(0.0) {}
 
 void Limit::AddOrder(const std::shared_ptr<Order>& order) {
     OrderList.push_back(order);
@@ -11,10 +11,9 @@ void Limit::AddOrder(const std::shared_ptr<Order>& order) {
 }
 
 void Limit::DeleteOrder(const std::shared_ptr<Order>& order) {
-    auto it = std::find(OrderList.begin(), OrderList.end(), order);
-    if (it != OrderList.end()) {
+    if (const auto shared_ptr = std::ranges::find(OrderList, order); shared_ptr != OrderList.end()) {
         // Replace the found order with the last order
-        *it = OrderList.back();
+        *shared_ptr = OrderList.back();
         OrderList.pop_back();  // Remove the last order
     }
 
@@ -22,7 +21,7 @@ void Limit::DeleteOrder(const std::shared_ptr<Order>& order) {
     order->LimitPtr = nullptr;
     TotalVolume -= order->Size;
 
-    std::sort(OrderList.begin(), OrderList.end(), [](Order* lhs, Order* rhs) {
+    std::ranges::sort(OrderList, [](const std::shared_ptr<Order>& lhs, const std::shared_ptr<Order>& rhs) {
         return lhs->Timestamp < rhs->Timestamp;
     });
 
@@ -32,11 +31,11 @@ std::vector<Match> Limit::Fill(const std::shared_ptr<Order>& order) {
     std::vector<Match> matches;
     std::vector<std::shared_ptr<Order>> ordersToDelete;
 
-    double remainingSize = order->Size;
+    double const remainingSize = order->Size;
 
-    for (auto it = OrderList.begin(); it != OrderList.end() && remainingSize > 0;) {
+    for (const auto it = OrderList.begin(); it != OrderList.end() && remainingSize > 0;) {
         auto& currentOrder = *it;
-        Match match = fillOrder(currentOrder, order);
+        Match const match = fillOrder(currentOrder, order);
 
         // Record the match
         matches.push_back(match);
@@ -51,7 +50,7 @@ std::vector<Match> Limit::Fill(const std::shared_ptr<Order>& order) {
         }
     }
 
-    for (auto it = ordersToDelete.begin(); it != ordersToDelete.end();) {
+    for (const auto it = ordersToDelete.begin(); it != ordersToDelete.end();) {
         DeleteOrder(*it);
     }
 
@@ -59,35 +58,36 @@ std::vector<Match> Limit::Fill(const std::shared_ptr<Order>& order) {
     return matches;
 }
 
-Match Limit::fillOrder(const std::shared_ptr<Order>& a, const std::shared_ptr<Order>& b) {
+Match Limit::fillOrder(const std::shared_ptr<Order>& a_order, const std::shared_ptr<Order>& b_order) const
+{
     std::shared_ptr<Order> bid;
     std::shared_ptr<Order> ask;
     double sizeFilled = 0.0;
 
     // Determine bid and ask orders
-    if (a->Bid) {
-        bid = a;
-        ask = b;
+    if (a_order->Bid) {
+        bid = a_order;
+        ask = b_order;
     } else {
-        bid = b;
-        ask = a;
+        bid = b_order;
+        ask = a_order;
     }
 
     // Adjust sizes and determine the size filled
-    if (a->Size > b->Size) {
-        a->Size -= b->Size;
-        sizeFilled = b->Size;
-        b->Size = 0.0;
+    if (a_order->Size > b_order->Size) {
+        a_order->Size -= b_order->Size;
+        sizeFilled = b_order->Size;
+        b_order->Size = 0.0;
     } else {
-        b->Size -= a->Size;
-        sizeFilled = a->Size;
-        a->Size = 0.0;
+        b_order->Size -= a_order->Size;
+        sizeFilled = a_order->Size;
+        a_order->Size = 0.0;
     }
 
     // Return the match result
     return Match{
-        bid,           // Bid order
-        ask,           // Ask order
+        ask,           // Bid order
+        bid,           // Ask order
         sizeFilled,    // Size filled
         Price          // Price of the limit
     };

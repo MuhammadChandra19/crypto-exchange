@@ -9,7 +9,7 @@ protected:
     LimitTest() {}
 
     // Helper function to create an order
-    std::shared_ptr<Order> CreateOrder(double size, bool isBid) {
+    static std::shared_ptr<Order> CreateOrder(const double size, const bool isBid) {
         auto order = std::make_shared<Order>();
         order->Size = size;
         order->Bid = isBid;
@@ -19,9 +19,9 @@ protected:
 
 // Test the AddOrder method
 TEST_F(LimitTest, AddOrder) {
-    auto limit = std::make_shared<Limit>(100.0); // Create a Limit with price 100.0
-    auto order1 = CreateOrder(10.0, true);  // A bid order with size 10.0
-    auto order2 = CreateOrder(5.0, false); // An ask order with size 5.0
+    const auto limit = std::make_shared<Limit>(100.0); // Create a Limit with price 100.0
+    const auto order1 = CreateOrder(10.0, true);  // A bid order with size 10.0
+    const auto order2 = CreateOrder(5.0, false); // An ask order with size 5.0
 
     // Add orders to the limit
     limit->AddOrder(order1);
@@ -34,9 +34,9 @@ TEST_F(LimitTest, AddOrder) {
 
 // Test the DeleteOrder method
 TEST_F(LimitTest, DeleteOrder) {
-    auto limit = std::make_shared<Limit>(100.0);
-    auto order1 = CreateOrder(10.0, true);
-    auto order2 = CreateOrder(5.0, false);
+    const auto limit = std::make_shared<Limit>(100.0);
+    const auto order1 = CreateOrder(10.0, true);
+    const auto order2 = CreateOrder(5.0, false);
 
     limit->AddOrder(order1);
     limit->AddOrder(order2);
@@ -51,12 +51,14 @@ TEST_F(LimitTest, DeleteOrder) {
 
 // Test the Fill method
 TEST_F(LimitTest, FillOrders) {
-    auto limit = std::make_shared<Limit>(100.0);
-    auto order1 = CreateOrder(10.0, true);   // A bid order with size 10.0
-    auto order2 = CreateOrder(5.0, false);   // An ask order with size 5.0
+    const auto limit = std::make_shared<Limit>(100.0);
+    const auto order1 = CreateOrder(10.0, true);   // A bid order with size 10.0
+    const auto order2 = CreateOrder(5.0, false);   // An ask order with size 5.0
 
     limit->AddOrder(order1);
     limit->AddOrder(order2);
+
+    ASSERT_EQ(limit->TotalVolume, 15.0);
 
     // Fill the orders
     auto matches = limit->Fill(order2);  // Fill the ask order with the bid order
@@ -71,15 +73,17 @@ TEST_F(LimitTest, FillOrders) {
 
 // Test if the Fill method handles partial fills
 TEST_F(LimitTest, FillPartialOrder) {
-    auto limit = std::make_shared<Limit>(100.0);
-    auto order1 = CreateOrder(10.0, true);   // A bid order with size 10.0
-    auto order2 = CreateOrder(7.0, false);   // An ask order with size 7.0
+    const auto limit = std::make_shared<Limit>(100.0);
+    const auto order1 = CreateOrder(10.0, true);   // A bid order with size 10.0
+    const auto order2 = CreateOrder(7.0, false);   // An ask order with size 7.0
 
     limit->AddOrder(order1);
     limit->AddOrder(order2);
 
+    ASSERT_EQ(limit->TotalVolume, 17.0);
+
     // Fill the orders partially
-    auto matches = limit->Fill(order2);
+    const auto matches = limit->Fill(order2);
 
     // Check if only part of the bid order is filled
     ASSERT_EQ(matches.size(), 1);

@@ -1,17 +1,17 @@
 #include "MatchingEngine.hpp"
 
 MatchingEngine::MatchingEngine() {
-    std::cout << "MatchingEngine Initialized." << std::endl;
+    std::cout << "MatchingEngine Initialized." << '\n';
 }
 
 MatchingEngine::~MatchingEngine() {
-    std::cout << "MatchingEngine Destroyed." << std::endl;
+    std::cout << "MatchingEngine Destroyed." << '\n';
 }
 
 void MatchingEngine::initialize() {
-    std::cout << "MatchingEngine is now ready." << std::endl;
+    std::cout << "MatchingEngine is now ready." << '\n';
 }
 
 void MatchingEngine::processOrder(const std::string& order) {
-    std::cout << "Processing order: " << order << std::endl;
+    std::cout << "Processing order: " << order << '\n';
 }
