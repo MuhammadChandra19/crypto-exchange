@@ -4,18 +4,23 @@
 
 Orderbook::Orderbook() = default;
 
+// Calculate total volume of asks
 double Orderbook::AskTotalVolume() const {
-    return std::accumulate(Asks.begin(), Asks.end(), 0.0, [](double sum, const std::shared_ptr<Limit>& limit) {
-        return sum + limit->TotalVolume;
-    });
+    return std::accumulate(Asks.begin(), Asks.end(), 0.0,
+        [](double sum, const std::shared_ptr<Limit>& limit) {
+            return sum + limit->TotalVolume;
+        });
 }
 
+// Calculate total volume of bids
 double Orderbook::BidTotalVolume() const {
-    return std::accumulate(Bids.begin(), Bids.end(), 0.0, [](double sum, const std::shared_ptr<Limit>& limit) {
-        return sum + limit->TotalVolume;
-    });
+    return std::accumulate(Bids.begin(), Bids.end(), 0.0,
+        [](double sum, const std::shared_ptr<Limit>& limit) {
+            return sum + limit->TotalVolume;
+        });
 }
 
+// Cancel an existing order
 void Orderbook::CancelOrder(const std::shared_ptr<Order>& order) {
     auto it = Orders.find(order->ID);
     if (it == Orders.end()) {
@@ -35,6 +40,7 @@ void Orderbook::CancelOrder(const std::shared_ptr<Order>& order) {
     Orders.erase(it);
 }
 
+// Place a limit order
 void Orderbook::PlaceLimitOrder(double price, const std::shared_ptr<Order>& order) {
     auto limit = FindOrCreateLimit(price, order->Bid);
     order->LimitPtr = limit;
@@ -42,9 +48,10 @@ void Orderbook::PlaceLimitOrder(double price, const std::shared_ptr<Order>& orde
     Orders[order->ID] = order;
 }
 
+// Place a market order and match it with existing orders
 std::vector<Match> Orderbook::PlaceMarketOrder(const std::shared_ptr<Order>& order) {
     std::vector<Match> matches;
-    auto& limits = order->Bid ? Asks : Bids;
+    auto& limits = order->Bid ? Asks : Bids; // Select the opposite side of the orderbook
 
     double remainingSize = order->Size;
 
@@ -58,7 +65,12 @@ std::vector<Match> Orderbook::PlaceMarketOrder(const std::shared_ptr<Order>& ord
             double fillPrice = bestLimit->Price;
 
             // Record the match
-            matches.push_back(Match{bestOrder->Bid ? nullptr : bestOrder, bestOrder->Bid ? bestOrder : nullptr, sizeFilled, fillPrice});
+            matches.push_back(Match{
+                bestOrder->Bid ? nullptr : bestOrder, // Counterparty's ask order
+                bestOrder->Bid ? bestOrder : nullptr, // Counterparty's bid order
+                sizeFilled,
+                fillPrice
+            });
 
             // Adjust order sizes
             remainingSize -= sizeFilled;
@@ -79,6 +91,7 @@ std::vector<Match> Orderbook::PlaceMarketOrder(const std::shared_ptr<Order>& ord
     return matches;
 }
 
+// Clear an empty limit from the orderbook
 void Orderbook::clearLimit(bool bid, const std::shared_ptr<Limit>& limit) {
     auto& limitMap = bid ? BidLimits : AskLimits;
     auto& limitsList = bid ? Bids : Asks;
@@ -89,27 +102,28 @@ void Orderbook::clearLimit(bool bid, const std::shared_ptr<Limit>& limit) {
         limitsList.end());
 }
 
+// Find or create a new limit for a given price
 std::shared_ptr<Limit> Orderbook::FindOrCreateLimit(double price, bool isBid) {
-    auto& limits = isBid ? BidLimits : AskLimits;
-    auto it = limits.find(price);
+    auto& limits = isBid ? Bids : Asks;
+    auto& limitMap = isBid ? BidLimits : AskLimits;
 
-    if (it != limits.end()) {
-        // Return the existing limit
+    auto it = limitMap.find(price);
+    if (it != limitMap.end()) {
         return it->second;
     }
 
-    // Create a new limit
     auto newLimit = std::make_shared<Limit>(price);
-    limits[price] = newLimit;
+    limits.push_back(newLimit);
+    limitMap[price] = newLimit;
     return newLimit;
 }
 
+// Remove an empty limit if it exists
 void Orderbook::removeEmptyLimit(double price, bool isBid) {
-    auto& limits = isBid ? BidLimits : AskLimits;
-    auto it = limits.find(price);
+    auto& limitMap = isBid ? BidLimits : AskLimits;
+    auto it = limitMap.find(price);
 
-    if (it != limits.end() && it->second->OrderList.empty()) {
-        // Remove the limit if no orders exist
-        limits.erase(it);
+    if (it != limitMap.end() && it->second->OrderList.empty()) {
+        limitMap.erase(it);
     }
 }

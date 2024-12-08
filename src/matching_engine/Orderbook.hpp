@@ -30,8 +30,24 @@ public:
 
 
     // Getters for sorted limits
-    const Limits& GetAsks() const { return Asks; }
-    const Limits& GetBids() const { return Bids; }
+    const Limits& GetAsks() const {
+        Limits sortedAsks = Asks;
+
+        std::sort(sortedAsks.begin(), sortedAsks.end(), [](const Limit& a, const Limit& b) {
+            return a.Price < b.Price;
+        });
+
+        return sortedAsks;
+    }
+    const Limits& GetBids() const {
+        Limits sortedBids = Bids;
+
+        std::sort(sortedBids.begin(), sortedBids.end(), [](const Limit& a, const Limit& b) {
+            return a.Price > b.Price;
+        });
+
+        return sortedBids;
+    }
 
 private:
 

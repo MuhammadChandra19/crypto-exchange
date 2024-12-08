@@ -1,18 +1,17 @@
 #pragma once
 
+#include <memory>
+#include <vector>
 #include "Order.hpp"
 #include "Match.hpp"
-#include <vector>
-#include <memory>
 
-class Limit {
+class Limit : public std::enable_shared_from_this<Limit> {
 public:
     double Price;
-    Orders OrderList;
     double TotalVolume;
+    std::vector<std::shared_ptr<Order>> OrderList;
 
-    Limit(double price);
-
+    explicit Limit(double price);
     void AddOrder(const std::shared_ptr<Order>& order);
     void DeleteOrder(const std::shared_ptr<Order>& order);
     std::vector<Match> Fill(const std::shared_ptr<Order>& order);
