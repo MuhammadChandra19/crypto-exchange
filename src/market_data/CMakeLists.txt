@@ -4,7 +4,6 @@ set(SOURCES
 
 set(HEADERS
     MarketDataPublisher.hpp
-        main.cpp
 )
 
 add_library(market_data STATIC ${SOURCES} ${HEADERS})

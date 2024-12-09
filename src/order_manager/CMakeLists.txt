@@ -4,7 +4,6 @@ set(SOURCES
 
 set(HEADERS
     OrderManager.hpp
-        main.cpp
 )
 
 add_library(order_manager STATIC ${SOURCES} ${HEADERS})

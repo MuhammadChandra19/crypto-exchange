@@ -1,4 +1,3 @@
-#include  <kafka/KafkaProducer.h>
 #include "MatchingEngine.hpp"
 
 MatchingEngine::MatchingEngine() {
