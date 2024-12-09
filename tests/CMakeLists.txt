@@ -4,7 +4,6 @@ FetchContent_Declare(
     URL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.zip
 )
 FetchContent_MakeAvailable(googletest)
-set(CMAKE_OSX_ARCHITECTURES "arm64")
 
 # Add test executable
 add_executable(tests
