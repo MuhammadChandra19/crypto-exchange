@@ -13,6 +13,7 @@ target_link_libraries(CryptoExchange
     PRIVATE order_manager
     PRIVATE market_data
     PRIVATE fmt
+    PRIVATE modern-cpp-kafka
 )
 
 target_include_directories(CryptoExchange PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

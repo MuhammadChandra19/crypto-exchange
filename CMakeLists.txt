@@ -25,6 +25,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(fmt)
 
+FetchContent_Declare(
+  modern-cpp-kafka
+  GIT_REPOSITORY https://github.com/morganstanley/modern-cpp-kafka.git
+  GIT_TAG v2024.07.03
+)
+FetchContent_MakeAvailable(modern-cpp-kafka)
+
+
 # Add subdirectories
 add_subdirectory(src)
 

@@ -17,3 +17,4 @@ set(HEADERS
 add_library(matching_engine STATIC ${SOURCES} ${HEADERS})
 
 target_include_directories(matching_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(matching_engine PUBLIC modern-cpp-kafka)
