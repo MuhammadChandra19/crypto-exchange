@@ -7,7 +7,7 @@ FetchContent_MakeAvailable(googletest)
 set(CMAKE_OSX_ARCHITECTURES "arm64")
 
 # Add test executable
-add_executable(tests
+add_executable(tests ${SOURCES}
     main.cpp
     LimitTests.cpp
     OrderbookTests.cpp
@@ -17,7 +17,7 @@ add_executable(tests
 target_link_libraries(tests PRIVATE
     gtest_main
     fmt
-    matching_engine
+        matching_engine
 )
 
 
